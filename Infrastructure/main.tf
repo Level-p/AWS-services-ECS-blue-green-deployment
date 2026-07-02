@@ -169,6 +169,19 @@ module "ecs_taks_definition_server" {
   container_port     = var.port_app_server
 }
 
+# ------- Creating ECS Task Definition for the client -------
+module "ecs_taks_definition_client" {
+  source             = "./Modules/ECS/TaskDefinition"
+  name               = "${var.environment_name}-client"
+  container_name     = var.container_name["client"]
+  execution_role_arn = module.ecs_role.arn_role
+  task_role_arn      = module.ecs_role.arn_role_ecs_task_role
+  cpu                = 256
+  memory             = "512"
+  docker_repo        = module.ecr_client.ecr_repository_url
+  region             = var.aws_region
+  container_port     = var.port_app_client
+}
 
 # ------- Creating a server Security Group for ECS TASKS -------
 module "security_group_ecs_task_server" {
@@ -180,6 +193,14 @@ module "security_group_ecs_task_server" {
   security_groups = [module.security_group_alb_server.sg_id]
 }
 # ------- Creating a client Security Group for ECS TASKS -------
+module "security_group_ecs_task_client" {
+  source          = "./Modules/SecurityGroup"
+  name            = "ecs-task-${var.environment_name}-client"
+  description     = "Controls access to the client ECS task"
+  vpc_id          = module.networking.aws_vpc
+  ingress_port    = var.port_app_client
+  security_groups = [module.security_group_alb_client.sg_id]
+}
 
 # ------- Creating ECS Cluster -------
 module "ecs_cluster" {

@@ -81,7 +81,7 @@ resource "aws_default_route_table" "rt_public" {
 
 # ------- Create EIP -------
 resource "aws_eip" "eip" {
-  domain = "vpc"
+  vpc = true
   tags = {
     Name = "eip-${var.name}"
   }
