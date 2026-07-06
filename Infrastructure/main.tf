@@ -19,6 +19,58 @@ provider "aws" {
   # }
 }
 
+data "aws_route53_zone" "zone" {
+  name         = var.domain_name
+  private_zone = false
+
+}
+#calling acm certificate
+
+resource "aws_acm_certificate" "varsitix-acm-cert" {
+  domain_name               = var.domain_name
+  subject_alternative_names = ["*.${var.domain_name}"]
+  validation_method         = "DNS"
+  lifecycle {
+    create_before_destroy = true
+  }
+
+  tags = {
+    Name = "${var.environment_name}-acm-cert"
+  }
+}
+
+data "aws_route53_zone" "varsitix-acp-zone" {
+  name         = var.domain_name
+  private_zone = false
+}
+
+# Fetch DNS Validation Records for ACM Certificate
+resource "aws_route53_record" "acm_validation_record" {
+  for_each = {
+    for dvo in aws_acm_certificate.varsitix-acm-cert.domain_validation_options : dvo.domain_name => {
+      name   = dvo.resource_record_name
+      record = dvo.resource_record_value
+      type   = dvo.resource_record_type
+    }
+  }
+
+  # Create DNS Validation Record for ACM Certificate
+  zone_id         = data.aws_route53_zone.varsitix-acp-zone.zone_id
+  allow_overwrite = true
+  name            = each.value.name
+  type            = each.value.type
+  ttl             = 60
+  records         = [each.value.record]
+  depends_on      = [aws_acm_certificate.varsitix-acm-cert]
+}
+
+# Validate the ACM Certificate after DNS Record Creation
+resource "aws_acm_certificate_validation" "varsitix_cert_validation" {
+  certificate_arn         = aws_acm_certificate.varsitix-acm-cert.arn
+  validation_record_fqdns = [for record in aws_route53_record.acm_validation_record : record.fqdn]
+  depends_on              = [aws_acm_certificate.varsitix-acm-cert]
+}
+
 # ------- Random numbers intended to be used as unique identifiers for resources -------
 resource "random_id" "RANDOM_ID" {
   byte_length = "2"
@@ -30,7 +82,7 @@ data "aws_caller_identity" "id_current_account" {}
 # ------- Networking -------
 module "networking" {
   source = "./Modules/Networking"
-  cidr   = ["10.120.0.0/16"]
+  cidr   = ["10.0.0.0/16"]
   name   = var.environment_name
 }
 
@@ -114,6 +166,7 @@ module "alb_server" {
   subnets        = [module.networking.public_subnets[0], module.networking.public_subnets[1]]
   security_group = module.security_group_alb_server.sg_id
   target_group   = module.target_group_server_blue.arn_tg
+  domain_name = "api.mfon21.space"
 }
 
 # ------- Creating Client Application ALB -------
@@ -124,6 +177,7 @@ module "alb_client" {
   subnets        = [module.networking.public_subnets[0], module.networking.public_subnets[1]]
   security_group = module.security_group_alb_client.sg_id
   target_group   = module.target_group_client_blue.arn_tg
+  domain_name = var.domain_name
 }
 
 # ------- ECS Role -------

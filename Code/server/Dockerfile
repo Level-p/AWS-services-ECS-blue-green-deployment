@@ -1,18 +1,20 @@
-# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
-# SPDX-License-Identifier: MIT-0
+FROM node:18-alpine
 
-FROM node:16-alpine
+WORKDIR /app
 
-RUN mkdir -p /home/node/app/node_modules
-
-WORKDIR /home/node/app
-
+# Copy package files first
 COPY package*.json ./
 
-RUN npm install
+# Install dependencies
+RUN npm install --production
 
+# Copy application code
 COPY . .
 
-EXPOSE 3001
+EXPOSE 5000
 
-CMD [ "npm", "start" ]
+# Lightweight healthcheck (no curl needed)
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
+  CMD node -e "require('http').get('http://localhost:5000', res => { process.exit(res.statusCode === 200 ? 0 : 1) })"
+
+CMD ["npm", "start"]

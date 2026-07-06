@@ -92,3 +92,9 @@ variable "repository_branch" {
   type        = string
   default     = "main"
 }
+
+variable "domain_name" {
+  description = "The domain name of the website"
+  type        = string
+  default     = "mfon21.space"
+}

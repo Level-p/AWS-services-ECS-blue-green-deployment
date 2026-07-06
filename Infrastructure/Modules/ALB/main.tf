@@ -78,3 +78,21 @@ resource "aws_alb_target_group" "target_group" {
     create_before_destroy = true
   }
 }
+
+data "aws_route53_zone" "zone" {
+  name         = var.domain_name 
+  private_zone = false
+}
+
+resource "aws_route53_record" "app" {
+  count = var.domain_name != null ? 1 : 0
+  zone_id = data.aws_route53_zone.zone.zone_id
+  name    = var.domain_name
+  type    = "A"
+
+  alias {
+    name                   = aws_alb.alb.dns_name
+    zone_id                = aws_lb.alb.zone_id
+    evaluate_target_health = true
+  }
+}

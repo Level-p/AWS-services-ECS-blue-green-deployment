@@ -1,9 +1,4 @@
-# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
-# SPDX-License-Identifier: MIT-0
 
-/*================================
-      AWS Security group
-=================================*/
 
 resource "aws_security_group" "sg" {
   name        = var.name

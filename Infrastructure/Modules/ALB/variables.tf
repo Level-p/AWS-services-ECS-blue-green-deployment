@@ -1,5 +1,3 @@
-# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
-# SPDX-License-Identifier: MIT-0
 
 variable "name" {
   description = "A name for the target group or ALB"
@@ -82,4 +80,10 @@ variable "health_check_port" {
   description = "The port to which the ALB will send health checks"
   type        = number
   default     = 80
+}
+
+variable "domain_name" {
+  description = "The domain name of the website"
+  type        = string
+  default     = null
 }
