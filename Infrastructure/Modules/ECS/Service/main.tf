@@ -5,7 +5,7 @@ resource "aws_ecs_service" "ecs_service" {
   cluster                           = var.ecs_cluster_id
   task_definition                   = var.arn_task_definition
   desired_count                     = var.desired_tasks
-  health_check_grace_period_seconds = 10
+  health_check_grace_period_seconds = 90
   launch_type                       = "FARGATE"
 
   network_configuration {

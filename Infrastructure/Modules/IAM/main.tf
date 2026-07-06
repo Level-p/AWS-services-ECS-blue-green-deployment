@@ -186,6 +186,14 @@ data "aws_iam_policy_document" "role_policy_devops_role" {
     resources = ["*"]
   }
   statement {
+    sid    = "AllowCodeStarConnectionUse"
+    effect = "Allow"
+    actions = [
+      "codestar-connections:UseConnection"
+    ]
+    resources = ["*"]
+  }
+  statement {
     sid    = "AllowCodebuildActions"
     effect = "Allow"
     actions = [

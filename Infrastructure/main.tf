@@ -18,7 +18,7 @@ provider "aws" {
 }
 
 resource "aws_secretsmanager_secret" "app_secrets" {
-  name = "pipe2-secrets"
+  name = "pipe4-secrets"
 }
 
 resource "aws_secretsmanager_secret_version" "app_secrets" {

@@ -15,12 +15,6 @@ variable "s3_bucket" {
   type        = string
 }
 
-variable "github_token" {
-  description = "Personal access token from Github"
-  type        = string
-  sensitive   = true
-}
-
 variable "repo_owner" {
   description = "The username of the Github repository owner"
   type        = string
@@ -64,4 +58,9 @@ variable "deployment_group_server" {
 variable "deployment_group_client" {
   description = "CodeDeploy deployment group name for the client"
   type        = string
+}
+
+variable "github_token" {
+  description = "Github token"
+  type = string
 }

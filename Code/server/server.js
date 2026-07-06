@@ -19,6 +19,11 @@ app.get('/', (req, res) => {
     res.status(200).json({message:  'Welcome to the support desk api'})
 })
 
+// Health check endpoint used by the ALB target group (health_check_path = "/status")
+app.get('/status', (req, res) => {
+    res.status(200).json({status: 'ok'})
+})
+
 // Routes
 app.use('/api/users', require('./routes/userRoutes'))
 app.use('/api/tickets', require('./routes/tickeRoutes'))
