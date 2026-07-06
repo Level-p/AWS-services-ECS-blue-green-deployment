@@ -98,3 +98,14 @@ variable "domain_name" {
   type        = string
   default     = "mfon21.space"
 }
+variable "MONGO_URI" {
+  type      = string
+  sensitive = true
+}
+
+variable "JWT_SECRET" {
+  type      = string
+  sensitive = true
+}
+
+

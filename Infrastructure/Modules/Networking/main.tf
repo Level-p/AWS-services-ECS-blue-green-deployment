@@ -1,5 +1,4 @@
-# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
-# SPDX-License-Identifier: MIT-0
+
 
 /*==================================================
       AWS Networking for the whole solution
@@ -94,7 +93,7 @@ resource "aws_nat_gateway" "natgw" {
   tags = {
     Name = "nat_${var.name}"
   }
-  depends_on = [ aws_internet_gateway.igw ]
+  depends_on = [aws_internet_gateway.igw]
 }
 
 # ------- Create Private Route Private Table -------

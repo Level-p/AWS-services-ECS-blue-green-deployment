@@ -12,31 +12,38 @@ resource "aws_ecs_task_definition" "ecs_task_definition" {
   execution_role_arn       = var.execution_role_arn
   task_role_arn            = var.task_role_arn
 
-  container_definitions = <<DEFINITION
-    [
-      {
-        "logConfiguration": {
-            "logDriver": "awslogs",
-            "secretOptions": null,
-            "options": {
-              "awslogs-group": "/ecs/task-definition-${var.name}",
-              "awslogs-region": "${var.region}",
-              "awslogs-stream-prefix": "ecs"
-            }
-          },
-        "cpu": 0,
-        "image": "${var.docker_repo}",
-        "name": "${var.container_name}",
-        "networkMode": "awsvpc",
-        "portMappings": [
-          {
-            "containerPort": ${var.container_port},
-            "hostPort": ${var.container_port}
-          }
-        ]
+  container_definitions = jsonencode([
+    {
+      logConfiguration = {
+        logDriver = "awslogs"
+        options = {
+          "awslogs-group"         = "/ecs/task-definition-${var.name}"
+          "awslogs-region"        = var.region
+          "awslogs-stream-prefix" = "ecs"
         }
-    ]
-    DEFINITION
+      }
+      cpu         = 0
+      image       = var.docker_repo
+      name        = var.container_name
+      networkMode = "awsvpc"
+      secrets = [
+        {
+          name      = "MONGO_URI"
+          valueFrom = "${var.secret_arn}:MONGO_URI::"
+        },
+        {
+          name      = "JWT_SECRET"
+          valueFrom = "${var.secret_arn}:JWT_SECRET::"
+        }
+      ]
+      portMappings = [
+        {
+          containerPort = var.container_port
+          hostPort      = var.container_port
+        }
+      ]
+    }
+  ])
 }
 
 # ------- CloudWatch Logs groups to store ecs-containers logs -------

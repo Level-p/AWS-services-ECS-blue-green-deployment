@@ -1,5 +1,3 @@
-# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
-# SPDX-License-Identifier: MIT-0
 
 /*===========================
           Root file
@@ -17,6 +15,19 @@ provider "aws" {
   #     Project    = "AWS_demo_fullstack_devops"
   #   }
   # }
+}
+
+resource "aws_secretsmanager_secret" "app_secrets" {
+  name = "pipe1-secrets"
+}
+
+resource "aws_secretsmanager_secret_version" "app_secrets" {
+  secret_id = aws_secretsmanager_secret.app_secrets.id
+
+  secret_string = jsonencode({
+    MONGO_URI  = var.MONGO_URI
+    JWT_SECRET = var.JWT_SECRET
+  })
 }
 
 data "aws_route53_zone" "zone" {
@@ -166,7 +177,8 @@ module "alb_server" {
   subnets        = [module.networking.public_subnets[0], module.networking.public_subnets[1]]
   security_group = module.security_group_alb_server.sg_id
   target_group   = module.target_group_server_blue.arn_tg
-  domain_name = "api.mfon21.space"
+  domain_name    = var.domain_name
+  record_name    = "api.${var.domain_name}"
 }
 
 # ------- Creating Client Application ALB -------
@@ -177,7 +189,7 @@ module "alb_client" {
   subnets        = [module.networking.public_subnets[0], module.networking.public_subnets[1]]
   security_group = module.security_group_alb_client.sg_id
   target_group   = module.target_group_client_blue.arn_tg
-  domain_name = var.domain_name
+  domain_name    = var.domain_name
 }
 
 # ------- ECS Role -------
@@ -221,6 +233,7 @@ module "ecs_taks_definition_server" {
   docker_repo        = module.ecr_server.ecr_repository_url
   region             = var.aws_region
   container_port     = var.port_app_server
+  secret_arn = aws_secretsmanager_secret.app_secrets.arn
 }
 
 # ------- Creating ECS Task Definition for the client -------
@@ -235,6 +248,7 @@ module "ecs_taks_definition_client" {
   docker_repo        = module.ecr_client.ecr_repository_url
   region             = var.aws_region
   container_port     = var.port_app_client
+  secret_arn = aws_secretsmanager_secret.app_secrets.arn
 }
 
 # ------- Creating a server Security Group for ECS TASKS -------

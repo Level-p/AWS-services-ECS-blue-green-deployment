@@ -83,7 +83,13 @@ variable "health_check_port" {
 }
 
 variable "domain_name" {
-  description = "The domain name of the website"
+  description = "The domain name of the hosted zone to look up"
+  type        = string
+  default     = null
+}
+
+variable "record_name" {
+  description = "The DNS record name to create (defaults to domain_name if not set)"
   type        = string
   default     = null
 }

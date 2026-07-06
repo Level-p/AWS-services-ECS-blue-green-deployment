@@ -44,9 +44,7 @@ variable "container_port" {
   description = "The port that the container will use to listen to requests"
   type        = number
 }
-
 variable "secret_arn" {
   description = "The env secrets"
   type        = string
-  default     = null
 }
