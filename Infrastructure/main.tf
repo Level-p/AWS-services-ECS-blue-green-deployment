@@ -228,8 +228,8 @@ module "ecs_taks_definition_server" {
   container_name     = var.container_name["server"]
   execution_role_arn = module.ecs_role.arn_role
   task_role_arn      = module.ecs_role.arn_role_ecs_task_role
-  cpu                = 256
-  memory             = "512"
+  cpu                = 512
+  memory             = "1024"
   docker_repo        = module.ecr_server.ecr_repository_url
   region             = var.aws_region
   container_port     = var.port_app_server
@@ -243,8 +243,8 @@ module "ecs_taks_definition_client" {
   container_name     = var.container_name["client"]
   execution_role_arn = module.ecs_role.arn_role
   task_role_arn      = module.ecs_role.arn_role_ecs_task_role
-  cpu                = 1024
-  memory             = "2048"
+  cpu                = 512
+  memory             = "1024"
   docker_repo        = module.ecr_client.ecr_repository_url
   region             = var.aws_region
   container_port     = var.port_app_client

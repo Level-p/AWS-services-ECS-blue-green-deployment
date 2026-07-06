@@ -24,20 +24,18 @@ FROM node:18-alpine
 
 WORKDIR /app
 
-# Copy package files
+# Copy package files and install production dependencies
 COPY package*.json ./
-
-# Install production dependencies only
 RUN npm install --omit=dev
 
-# Copy build output and required files
+# Copy build output from builder stage
 COPY --from=builder /app/build ./build
 COPY --from=builder /app/public ./public
 
 EXPOSE 3000
 
-# Lightweight healthcheck
-HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
-  CMD node -e "require('http').get('http://localhost:3000', res => { process.exit(res.statusCode === 200 ? 0 : 1) })"
+# Healthcheck allows time for React app initialization and static assets loading
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
+  CMD node -e "require('http').get('http://localhost:3000', res => { process.exit(res.statusCode === 200 ? 0 : 1) })" || exit 1
 
 CMD ["npm", "start"]

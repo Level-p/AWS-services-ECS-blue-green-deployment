@@ -6,7 +6,7 @@
 resource "aws_codebuild_project" "aws_codebuild" {
   name          = var.name
   description   = "Terraform codebuild project"
-  build_timeout = "10"
+  build_timeout = "30"
   service_role  = var.iam_role
 
   artifacts {
@@ -14,8 +14,8 @@ resource "aws_codebuild_project" "aws_codebuild" {
   }
 
   environment {
-    compute_type    = "BUILD_GENERAL1_SMALL"
-    image           = "aws/codebuild/standard:4.0"
+    compute_type    = "BUILD_GENERAL1_MEDIUM"
+    image           = "aws/codebuild/standard:5.0"
     type            = "LINUX_CONTAINER"
     privileged_mode = true
 
