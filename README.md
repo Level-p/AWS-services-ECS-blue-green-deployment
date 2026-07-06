@@ -7,7 +7,7 @@ This project demonstrates a production-grade AWS architecture for containerized 
 ## Architecture
 
 <p align="center">
-  <img src="Documentation_assets/Infrastructure_architecture.png" width="600"/>
+  <img src="Documentation_assets/Infrastructure_architecture.png"/>
 </p>
 
 The infrastructure deploys:
