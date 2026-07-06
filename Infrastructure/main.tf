@@ -18,7 +18,7 @@ provider "aws" {
 }
 
 resource "aws_secretsmanager_secret" "app_secrets" {
-  name = "pipe1-secrets"
+  name = "pipe2-secrets"
 }
 
 resource "aws_secretsmanager_secret_version" "app_secrets" {
@@ -102,7 +102,7 @@ module "target_group_server_blue" {
   source              = "./Modules/ALB"
   create_target_group = true
   name                = "tg-${var.environment_name}-s-b"
-  port                = 80
+  port                = 5000
   protocol            = "HTTP"
   vpc                 = module.networking.aws_vpc
   tg_type             = "ip"
@@ -115,7 +115,7 @@ module "target_group_server_green" {
   source              = "./Modules/ALB"
   create_target_group = true
   name                = "tg-${var.environment_name}-s-g"
-  port                = 80
+  port                = 5000
   protocol            = "HTTP"
   vpc                 = module.networking.aws_vpc
   tg_type             = "ip"
@@ -128,7 +128,7 @@ module "target_group_client_blue" {
   source              = "./Modules/ALB"
   create_target_group = true
   name                = "tg-${var.environment_name}-c-b"
-  port                = 80
+  port                = 3000
   protocol            = "HTTP"
   vpc                 = module.networking.aws_vpc
   tg_type             = "ip"
@@ -141,7 +141,7 @@ module "target_group_client_green" {
   source              = "./Modules/ALB"
   create_target_group = true
   name                = "tg-${var.environment_name}-c-g"
-  port                = 80
+  port                = 3000
   protocol            = "HTTP"
   vpc                 = module.networking.aws_vpc
   tg_type             = "ip"
@@ -156,7 +156,7 @@ module "security_group_alb_server" {
   description         = "Controls access to the server ALB"
   vpc_id              = module.networking.aws_vpc
   cidr_blocks_ingress = ["0.0.0.0/0"]
-  ingress_port        = 80
+  ingress_port        = 5000
 }
 
 # ------- Creating Security Group for the client ALB -------
@@ -166,7 +166,7 @@ module "security_group_alb_client" {
   description         = "Controls access to the client ALB"
   vpc_id              = module.networking.aws_vpc
   cidr_blocks_ingress = ["0.0.0.0/0"]
-  ingress_port        = 80
+  ingress_port        = 3000
 }
 
 # ------- Creating Server Application ALB -------
@@ -243,8 +243,8 @@ module "ecs_taks_definition_client" {
   container_name     = var.container_name["client"]
   execution_role_arn = module.ecs_role.arn_role
   task_role_arn      = module.ecs_role.arn_role_ecs_task_role
-  cpu                = 256
-  memory             = "512"
+  cpu                = 1024
+  memory             = "2048"
   docker_repo        = module.ecr_client.ecr_repository_url
   region             = var.aws_region
   container_port     = var.port_app_client
