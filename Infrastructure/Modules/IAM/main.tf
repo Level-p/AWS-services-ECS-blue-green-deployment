@@ -5,7 +5,30 @@
       AWS IAM for different resources
 ============================================*/
 
-# ------- IAM Roles -------
+# ------- IAM Roles -------z
+resource "aws_iam_policy" "ecs_secrets_policy" {
+  count = var.create_ecs_role == true ? 1 : 0
+  name = "ecs-secrets-policy"
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "secretsmanager:GetSecretValue"
+        ]
+        Resource = ["*"]
+      }
+    ]
+  })
+
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
+
 resource "aws_iam_role" "ecs_task_excecution_role" {
   count              = var.create_ecs_role == true ? 1 : 0
   name               = var.name
@@ -145,6 +168,17 @@ resource "aws_iam_role_policy_attachment" "ecs_attachment" {
   }
 }
 
+
+resource "aws_iam_role_policy_attachment" "ecs_secrets_attach" {
+  count      = var.create_ecs_role == true ? 1 : 0
+  role       = aws_iam_role.ecs_task_excecution_role[0].name
+  policy_arn = aws_iam_policy.ecs_secrets_policy[0].arn
+
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
 resource "aws_iam_role_policy_attachment" "attachment" {
   count      = length(aws_iam_role.ecs_task_excecution_role) > 0 ? 1 : 0
   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
@@ -182,14 +216,6 @@ data "aws_iam_policy_document" "role_policy_devops_role" {
       "s3:GetObjectVersion",
       "s3:GetBucketAcl",
       "s3:List*"
-    ]
-    resources = ["*"]
-  }
-  statement {
-    sid    = "AllowCodeStarConnectionUse"
-    effect = "Allow"
-    actions = [
-      "codestar-connections:UseConnection"
     ]
     resources = ["*"]
   }

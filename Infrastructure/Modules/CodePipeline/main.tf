@@ -4,15 +4,6 @@
       AWS CodePipeline for build and deployment
 ========================================================*/
 
-# ------- GitHub (version 2) source via a CodeStar Connection -------
-# NOTE: A new connection is created in "PENDING" status. After the first apply
-# you must complete the OAuth handshake in the AWS console (Developer Tools ->
-# Settings -> Connections) before the pipeline can pull from GitHub.
-resource "aws_codestarconnections_connection" "github" {
-  name          = substr("gh-${var.github_token}", 0, 32)
-  provider_type = "GitHub"
-}
-
 resource "aws_codepipeline" "aws_codepipeline" {
   name     = var.name
   role_arn = var.pipe_role
@@ -28,16 +19,17 @@ resource "aws_codepipeline" "aws_codepipeline" {
     action {
       name             = "Source"
       category         = "Source"
-      owner            = "AWS"
-      provider         = "CodeStarSourceConnection"
+      owner            = "ThirdParty"
+      provider         = "GitHub"
       version          = "1"
       output_artifacts = ["SourceArtifact"]
 
       configuration = {
-        ConnectionArn        = aws_codestarconnections_connection.github.arn
-        FullRepositoryId     = "${var.repo_owner}/${var.repo_name}"
-        BranchName           = var.branch
-        OutputArtifactFormat = "CODE_ZIP"
+        OAuthToken           = var.github_token
+        Owner                = var.repo_owner
+        Repo                 = var.repo_name
+        Branch               = var.branch
+        PollForSourceChanges = true
       }
     }
   }
@@ -111,6 +103,11 @@ resource "aws_codepipeline" "aws_codepipeline" {
         AppSpecTemplatePath            = "appspec.yaml"
       }
     }
+  }
+
+  lifecycle {
+    # prevents github OAuthToken from causing updates, since it's removed from state file
+    ignore_changes = [stage[0].action[0].configuration]
   }
 
 }

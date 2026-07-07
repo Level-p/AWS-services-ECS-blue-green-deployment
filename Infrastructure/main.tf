@@ -17,12 +17,12 @@ provider "aws" {
   # }
 }
 
-resource "aws_secretsmanager_secret" "app_secrets" {
-  name = "pipe4-secrets"
+resource "aws_secretsmanager_secret" "secretes" {
+  name = "sceret108"
 }
 
-resource "aws_secretsmanager_secret_version" "app_secrets" {
-  secret_id = aws_secretsmanager_secret.app_secrets.id
+resource "aws_secretsmanager_secret_version" "secretes" {
+  secret_id = aws_secretsmanager_secret.secretes.id
 
   secret_string = jsonencode({
     MONGO_URI  = var.MONGO_URI
@@ -102,7 +102,7 @@ module "target_group_server_blue" {
   source              = "./Modules/ALB"
   create_target_group = true
   name                = "tg-${var.environment_name}-s-b"
-  port                = 5000
+  port                = 80
   protocol            = "HTTP"
   vpc                 = module.networking.aws_vpc
   tg_type             = "ip"
@@ -115,7 +115,7 @@ module "target_group_server_green" {
   source              = "./Modules/ALB"
   create_target_group = true
   name                = "tg-${var.environment_name}-s-g"
-  port                = 5000
+  port                = 80
   protocol            = "HTTP"
   vpc                 = module.networking.aws_vpc
   tg_type             = "ip"
@@ -128,7 +128,7 @@ module "target_group_client_blue" {
   source              = "./Modules/ALB"
   create_target_group = true
   name                = "tg-${var.environment_name}-c-b"
-  port                = 3000
+  port                = 80
   protocol            = "HTTP"
   vpc                 = module.networking.aws_vpc
   tg_type             = "ip"
@@ -141,7 +141,7 @@ module "target_group_client_green" {
   source              = "./Modules/ALB"
   create_target_group = true
   name                = "tg-${var.environment_name}-c-g"
-  port                = 3000
+  port                = 80
   protocol            = "HTTP"
   vpc                 = module.networking.aws_vpc
   tg_type             = "ip"
@@ -156,7 +156,7 @@ module "security_group_alb_server" {
   description         = "Controls access to the server ALB"
   vpc_id              = module.networking.aws_vpc
   cidr_blocks_ingress = ["0.0.0.0/0"]
-  ingress_port        = 5000
+  ingress_port        = 80
 }
 
 # ------- Creating Security Group for the client ALB -------
@@ -166,7 +166,7 @@ module "security_group_alb_client" {
   description         = "Controls access to the client ALB"
   vpc_id              = module.networking.aws_vpc
   cidr_blocks_ingress = ["0.0.0.0/0"]
-  ingress_port        = 3000
+  ingress_port        = 80
 }
 
 # ------- Creating Server Application ALB -------
@@ -233,7 +233,7 @@ module "ecs_taks_definition_server" {
   docker_repo        = module.ecr_server.ecr_repository_url
   region             = var.aws_region
   container_port     = var.port_app_server
-  secret_arn = aws_secretsmanager_secret.app_secrets.arn
+  secret_arn = aws_secretsmanager_secret.secretes.arn
 }
 
 # ------- Creating ECS Task Definition for the client -------
@@ -248,7 +248,7 @@ module "ecs_taks_definition_client" {
   docker_repo        = module.ecr_client.ecr_repository_url
   region             = var.aws_region
   container_port     = var.port_app_client
-  secret_arn = aws_secretsmanager_secret.app_secrets.arn
+  secret_arn = aws_secretsmanager_secret.secretes.arn
 }
 
 # ------- Creating a server Security Group for ECS TASKS -------

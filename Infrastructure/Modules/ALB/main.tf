@@ -60,18 +60,17 @@ resource "aws_alb_target_group" "target_group" {
   protocol             = var.protocol
   vpc_id               = var.vpc
   target_type          = var.tg_type
-  deregistration_delay = 5
+  # deregistration_delay = 5
 
   health_check {
     enabled             = true
     interval            = 15
     path                = var.health_check_path
-    port                = var.health_check_port
-    protocol            = var.protocol
+    # port                = var.health_check_port
+    # protocol            = var.protocol
     timeout             = 10
-    healthy_threshold   = 2
-    unhealthy_threshold = 3
-    matcher             = "200"
+    # healthy_threshold   = 2
+    # unhealthy_threshold = 3
   }
 
   lifecycle {
